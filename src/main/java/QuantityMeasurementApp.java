@@ -28,9 +28,21 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
+        public double getValue() {
+            return value;
+        }
+
+        public LengthUnit getUnit() {
+            return unit;
+        }
+
         public QuantityLength convertTo(LengthUnit targetUnit) {
             double convertedValue = convert(this.value, this.unit, targetUnit);
             return new QuantityLength(convertedValue, targetUnit);
+        }
+
+        public QuantityLength add(QuantityLength other) {
+            return QuantityMeasurementApp.add(this, other);
         }
 
         private double convertToBaseUnit() {
@@ -51,7 +63,7 @@ public class QuantityMeasurementApp {
 
         @Override
         public String toString() {
-            return value + " " + unit;
+            return "Quantity(" + value + ", " + unit + ")";
         }
     }
 
@@ -64,6 +76,22 @@ public class QuantityMeasurementApp {
         return baseValue / targetUnit.getConversionFactor();
     }
 
+    public static QuantityLength add(QuantityLength first, QuantityLength second) {
+        if (first == null || second == null)
+            throw new IllegalArgumentException("Quantity length cannot be null");
+
+        double secondValueInFirstUnit = convert(second.value, second.unit, first.unit);
+        double result = first.value + secondValueInFirstUnit;
+
+        return new QuantityLength(result, first.unit);
+    }
+
+    public static QuantityLength add(double firstValue, LengthUnit firstUnit, double secondValue, LengthUnit secondUnit) {
+        QuantityLength first = new QuantityLength(firstValue, firstUnit);
+        QuantityLength second = new QuantityLength(secondValue, secondUnit);
+        return add(first, second);
+    }
+
     private static void validateValue(double value) {
         if (!Double.isFinite(value))
             throw new IllegalArgumentException("Value must be finite");
@@ -74,35 +102,16 @@ public class QuantityMeasurementApp {
             throw new IllegalArgumentException("Unit cannot be null");
     }
 
-    public static double demonstrateLengthConversion(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
-        return convert(value, sourceUnit, targetUnit);
-    }
-
-    public static QuantityLength demonstrateLengthConversion(QuantityLength quantityLength, LengthUnit targetUnit) {
-        if (quantityLength == null)
-            throw new IllegalArgumentException("Quantity length cannot be null");
-
-        return quantityLength.convertTo(targetUnit);
-    }
-
-    public static boolean demonstrateLengthEquality(QuantityLength first, QuantityLength second) {
-        if (first == null || second == null)
-            return false;
-
-        return first.equals(second);
-    }
-
-    public static boolean demonstrateLengthComparison(double firstValue, LengthUnit firstUnit, double secondValue, LengthUnit secondUnit) {
-        QuantityLength first = new QuantityLength(firstValue, firstUnit);
-        QuantityLength second = new QuantityLength(secondValue, secondUnit);
-        return demonstrateLengthEquality(first, second);
-    }
-
     public static void main(String[] args) {
-        System.out.println(convert(1.0, LengthUnit.FEET, LengthUnit.INCHES));
-        System.out.println(convert(3.0, LengthUnit.YARDS, LengthUnit.FEET));
-        System.out.println(convert(36.0, LengthUnit.INCHES, LengthUnit.YARDS));
-        System.out.println(convert(1.0, LengthUnit.CENTIMETERS, LengthUnit.INCHES));
-        System.out.println(convert(0.0, LengthUnit.FEET, LengthUnit.INCHES));
+        QuantityLength result1 = add(
+                new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES));
+
+        QuantityLength result2 = add(
+                new QuantityLength(1.0, LengthUnit.YARDS),
+                new QuantityLength(3.0, LengthUnit.FEET));
+
+        System.out.println(result1);
+        System.out.println(result2);
     }
 }
