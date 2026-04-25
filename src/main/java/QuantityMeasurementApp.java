@@ -42,7 +42,11 @@ public class QuantityMeasurementApp {
         }
 
         public QuantityLength add(QuantityLength other) {
-            return QuantityMeasurementApp.add(this, other);
+            return add(this, other);
+        }
+
+        public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+            return add(this, other, targetUnit);
         }
 
         private double convertToBaseUnit() {
@@ -80,16 +84,32 @@ public class QuantityMeasurementApp {
         if (first == null || second == null)
             throw new IllegalArgumentException("Quantity length cannot be null");
 
-        double secondValueInFirstUnit = convert(second.value, second.unit, first.unit);
-        double result = first.value + secondValueInFirstUnit;
+        return add(first, second, first.unit);
+    }
 
-        return new QuantityLength(result, first.unit);
+    public static QuantityLength add(QuantityLength first, QuantityLength second, LengthUnit targetUnit) {
+        if (first == null || second == null)
+            throw new IllegalArgumentException("Quantity length cannot be null");
+
+        validateUnit(targetUnit);
+
+        double firstValueInTargetUnit = convert(first.value, first.unit, targetUnit);
+        double secondValueInTargetUnit = convert(second.value, second.unit, targetUnit);
+        double result = firstValueInTargetUnit + secondValueInTargetUnit;
+
+        return new QuantityLength(result, targetUnit);
     }
 
     public static QuantityLength add(double firstValue, LengthUnit firstUnit, double secondValue, LengthUnit secondUnit) {
         QuantityLength first = new QuantityLength(firstValue, firstUnit);
         QuantityLength second = new QuantityLength(secondValue, secondUnit);
         return add(first, second);
+    }
+
+    public static QuantityLength add(double firstValue, LengthUnit firstUnit, double secondValue, LengthUnit secondUnit, LengthUnit targetUnit) {
+        QuantityLength first = new QuantityLength(firstValue, firstUnit);
+        QuantityLength second = new QuantityLength(secondValue, secondUnit);
+        return add(first, second, targetUnit);
     }
 
     private static void validateValue(double value) {
@@ -105,11 +125,13 @@ public class QuantityMeasurementApp {
     public static void main(String[] args) {
         QuantityLength result1 = add(
                 new QuantityLength(1.0, LengthUnit.FEET),
-                new QuantityLength(12.0, LengthUnit.INCHES));
+                new QuantityLength(12.0, LengthUnit.INCHES),
+                LengthUnit.FEET);
 
         QuantityLength result2 = add(
-                new QuantityLength(1.0, LengthUnit.YARDS),
-                new QuantityLength(3.0, LengthUnit.FEET));
+                new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES),
+                LengthUnit.YARDS);
 
         System.out.println(result1);
         System.out.println(result2);
