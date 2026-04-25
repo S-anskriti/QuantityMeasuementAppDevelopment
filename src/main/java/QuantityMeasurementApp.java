@@ -1,22 +1,5 @@
 public class QuantityMeasurementApp {
 
-    public enum LengthUnit {
-        FEET(12.0),
-        INCHES(1.0),
-        YARDS(36.0),
-        CENTIMETERS(0.393701);
-
-        private final double conversionFactor;
-
-        LengthUnit(double conversionFactor) {
-            this.conversionFactor = conversionFactor;
-        }
-
-        public double getConversionFactor() {
-            return conversionFactor;
-        }
-    }
-
     public static class QuantityLength {
         private final double value;
         private final LengthUnit unit;
@@ -50,7 +33,7 @@ public class QuantityMeasurementApp {
         }
 
         private double convertToBaseUnit() {
-            return value * unit.getConversionFactor();
+            return unit.convertToBaseUnit(value);
         }
 
         @Override
@@ -76,8 +59,8 @@ public class QuantityMeasurementApp {
         validateUnit(sourceUnit);
         validateUnit(targetUnit);
 
-        double baseValue = value * sourceUnit.getConversionFactor();
-        return baseValue / targetUnit.getConversionFactor();
+        double baseValue = sourceUnit.convertToBaseUnit(value);
+        return targetUnit.convertFromBaseUnit(baseValue);
     }
 
     public static QuantityLength add(QuantityLength first, QuantityLength second) {
@@ -93,9 +76,10 @@ public class QuantityMeasurementApp {
 
         validateUnit(targetUnit);
 
-        double firstValueInTargetUnit = convert(first.value, first.unit, targetUnit);
-        double secondValueInTargetUnit = convert(second.value, second.unit, targetUnit);
-        double result = firstValueInTargetUnit + secondValueInTargetUnit;
+        double firstBaseValue = first.unit.convertToBaseUnit(first.value);
+        double secondBaseValue = second.unit.convertToBaseUnit(second.value);
+        double totalBaseValue = firstBaseValue + secondBaseValue;
+        double result = targetUnit.convertFromBaseUnit(totalBaseValue);
 
         return new QuantityLength(result, targetUnit);
     }
@@ -123,17 +107,15 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        QuantityLength result1 = add(
-                new QuantityLength(1.0, LengthUnit.FEET),
+        QuantityLength feet = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength inches = feet.convertTo(LengthUnit.INCHES);
+
+        QuantityLength result = feet.add(
                 new QuantityLength(12.0, LengthUnit.INCHES),
                 LengthUnit.FEET);
 
-        QuantityLength result2 = add(
-                new QuantityLength(1.0, LengthUnit.FEET),
-                new QuantityLength(12.0, LengthUnit.INCHES),
-                LengthUnit.YARDS);
-
-        System.out.println(result1);
-        System.out.println(result2);
+        System.out.println(inches);
+        System.out.println(result);
+        System.out.println(new QuantityLength(36.0, LengthUnit.INCHES).equals(new QuantityLength(1.0, LengthUnit.YARDS)));
     }
 }
