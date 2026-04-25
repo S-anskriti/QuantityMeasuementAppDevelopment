@@ -1,8 +1,10 @@
 public class QuantityMeasurementApp {
 
     public enum LengthUnit {
-        FEET(1.0),
-        INCH(1.0 / 12.0);
+        FEET(12.0),
+        INCH(1.0),
+        YARDS(36.0),
+        CENTIMETERS(0.393701);
 
         private final double conversionFactor;
 
@@ -27,7 +29,7 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
-        private double convertToFeet() {
+        private double convertToInches() {
             return value * unit.getConversionFactor();
         }
 
@@ -40,14 +42,17 @@ public class QuantityMeasurementApp {
                 return false;
 
             QuantityLength quantityLength = (QuantityLength) obj;
-            return Double.compare(this.convertToFeet(), quantityLength.convertToFeet()) == 0;
+            return Math.abs(this.convertToInches() - quantityLength.convertToInches()) < 0.0001;
         }
     }
 
     public static void main(String[] args) {
-        QuantityLength feet = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength inches = new QuantityLength(12.0, LengthUnit.INCH);
+        QuantityLength yards = new QuantityLength(1.0, LengthUnit.YARDS);
+        QuantityLength feet = new QuantityLength(3.0, LengthUnit.FEET);
+        QuantityLength centimeters = new QuantityLength(1.0, LengthUnit.CENTIMETERS);
+        QuantityLength inches = new QuantityLength(0.393701, LengthUnit.INCH);
 
-        System.out.println("Equal: " + feet.equals(inches));
+        System.out.println("Yard and Feet Equal: " + yards.equals(feet));
+        System.out.println("Centimeter and Inch Equal: " + centimeters.equals(inches));
     }
 }
